@@ -2,14 +2,9 @@ using SavingsAccount.Domain;
 
 namespace SavingsAccount.Application.Services;
 
-public class SavingsAccountService
+public class SavingsAccountService(ISavingsAccountRepository repository)
 {
-    private readonly ISavingsAccountRepository _repository;
-
-    public SavingsAccountService(ISavingsAccountRepository repository)
-    {
-        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-    }
+    private readonly ISavingsAccountRepository _repository = repository ?? throw new ArgumentNullException(nameof(repository));
 
     public async Task<Domain.SavingsAccount> CreateAccountAsync(string accountId, decimal interestRate = 0.042m)
     {
