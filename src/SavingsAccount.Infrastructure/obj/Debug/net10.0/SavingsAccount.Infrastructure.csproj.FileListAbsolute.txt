@@ -1,0 +1,15 @@
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/bin/Debug/net10.0/SavingsAccount.Infrastructure.deps.json
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/bin/Debug/net10.0/SavingsAccount.Infrastructure.dll
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/bin/Debug/net10.0/SavingsAccount.Infrastructure.pdb
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/bin/Debug/net10.0/SavingsAccount.Domain.dll
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/bin/Debug/net10.0/SavingsAccount.Domain.pdb
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsAccount.Infrastructure.csproj.AssemblyReference.cache
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsAccount.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsAccount.Infrastructure.AssemblyInfoInputs.cache
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsAccount.Infrastructure.AssemblyInfo.cs
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsAccount.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsA.D70F7F02.Up2Date
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsAccount.Infrastructure.dll
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/refint/SavingsAccount.Infrastructure.dll
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/SavingsAccount.Infrastructure.pdb
+/Users/ashley/savings/src/SavingsAccount.Infrastructure/obj/Debug/net10.0/ref/SavingsAccount.Infrastructure.dll

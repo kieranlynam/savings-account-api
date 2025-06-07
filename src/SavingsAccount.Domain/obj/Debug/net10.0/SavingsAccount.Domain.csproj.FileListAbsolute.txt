@@ -1,0 +1,11 @@
+/Users/ashley/savings/src/SavingsAccount.Domain/bin/Debug/net10.0/SavingsAccount.Domain.deps.json
+/Users/ashley/savings/src/SavingsAccount.Domain/bin/Debug/net10.0/SavingsAccount.Domain.dll
+/Users/ashley/savings/src/SavingsAccount.Domain/bin/Debug/net10.0/SavingsAccount.Domain.pdb
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/SavingsAccount.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/SavingsAccount.Domain.AssemblyInfoInputs.cache
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/SavingsAccount.Domain.AssemblyInfo.cs
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/SavingsAccount.Domain.csproj.CoreCompileInputs.cache
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/SavingsAccount.Domain.dll
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/refint/SavingsAccount.Domain.dll
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/SavingsAccount.Domain.pdb
+/Users/ashley/savings/src/SavingsAccount.Domain/obj/Debug/net10.0/ref/SavingsAccount.Domain.dll
