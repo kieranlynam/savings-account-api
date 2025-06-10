@@ -1,0 +1,365 @@
+openapi: 3.0.3
+info:
+  title: Savings Account API
+  description: API for managing savings accounts with deposits, withdrawals, and interest accruals
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:5218
+    description: Development server
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    description: Staging server
+
+paths:
+  /accounts:
+    post:
+      summary: Create a new savings account
+      description: Creates a new savings account and returns the account identifier
+      operationId: createAccount
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+            examples:
+              basic:
+                summary: Basic account creation
+                value:
+                  accountId: "acc_user123"
+                  interestRate: 0.042
+              custom_rate:
+                summary: Account with custom interest rate
+                value:
+                  accountId: "savings_2024_001"
+                  interestRate: 0.035
+              default_rate:
+                summary: Account with default rate
+                value:
+                  accountId: "my_savings_account"
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountCreationResponse'
+              example:
+                accountId: "acc_user123"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /accounts/{accountId}/deposits:
+    post:
+      summary: Deposit money into an account
+      description: Adds money to the specified savings account
+      operationId: depositMoney
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoneyAmount'
+            example:
+              amount: "123.45"
+      responses:
+        '204':
+          description: Deposit completed successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          description: Invalid deposit amount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_amount:
+                  summary: Invalid amount format
+                  value:
+                    error: "INVALID_AMOUNT"
+                    message: "Amount must be at least 0.01"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /accounts/{accountId}/withdrawals:
+    post:
+      summary: Withdraw money from an account
+      description: Removes money from the specified savings account
+      operationId: withdrawMoney
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoneyAmount'
+            example:
+              amount: "50.00"
+      responses:
+        '204':
+          description: Withdrawal completed successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          description: Insufficient funds or invalid withdrawal amount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                insufficient_funds:
+                  summary: Insufficient account balance
+                  value:
+                    error: "INSUFFICIENT_FUNDS"
+                    message: "Account balance is insufficient for this withdrawal"
+                invalid_amount:
+                  summary: Invalid withdrawal amount
+                  value:
+                    error: "INVALID_AMOUNT"
+                    message: "Amount must be at least 0.01"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /accounts/{accountId}/balance:
+    get:
+      summary: Get account balance
+      description: Retrieves the current balance of the specified savings account
+      operationId: getAccountBalance
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+      responses:
+        '200':
+          description: Account balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+              example:
+                accountId: "acc_user123"
+                balance: "1234.56"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /accounts/{accountId}/interest_accruals:
+    post:
+      summary: Accrue interest on an account
+      description: Manually triggers interest calculation and accrual for the specified account
+      operationId: accrueInterest
+      parameters:
+        - $ref: '#/components/parameters/AccountId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+            example: {}
+      responses:
+        '204':
+          description: Interest accrued successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  parameters:
+    AccountId:
+      name: accountId
+      in: path
+      required: true
+      description: Unique identifier for the savings account
+      schema:
+        type: string
+        pattern: '^[a-zA-Z0-9_-]+$'
+        example: "acc_1234567890abcdef"
+
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      description: |
+        Unique key to ensure idempotent operations. Use the same key for retries
+        of the same logical operation to prevent duplicate processing.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 255
+        example: "idempotent-key-12345"
+
+  schemas:
+    CreateAccountRequest:
+      type: object
+      required:
+        - accountId
+      properties:
+        accountId:
+          type: string
+          description: Unique identifier for the account to create
+          pattern: '^[a-zA-Z0-9_-]+$'
+          example: "acc_user123"
+        interestRate:
+          type: number
+          format: decimal
+          description: Annual interest rate as a decimal (e.g., 0.042 for 4.2%)
+          minimum: 0
+          maximum: 1
+          example: 0.042
+
+    AccountCreationResponse:
+      type: object
+      required:
+        - accountId
+      properties:
+        accountId:
+          type: string
+          description: Unique identifier for the created account
+          example: "acc_1234567890abcdef"
+
+    MoneyAmount:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: string
+          pattern: '^(0\.(0[1-9]|[1-9][0-9])|[1-9][0-9]*(\.[0-9]{1,2})?)$'
+          description: |
+            Amount of money as a decimal string to avoid floating point precision issues.
+            Must be at least 0.01 with up to 2 decimal places.
+          example: "123.45"
+
+    BalanceResponse:
+      type: object
+      required:
+        - accountId
+        - balance
+      properties:
+        accountId:
+          type: string
+          description: Unique identifier for the account
+          example: "acc_1234567890abcdef"
+        balance:
+          type: string
+          pattern: '^[0-9]+(\.[0-9]{1,2})?$'
+          description: Current account balance as a decimal string
+          example: "1234.56"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code identifier
+          enum:
+            - "INVALID_REQUEST"
+            - "INVALID_AMOUNT"
+            - "ACCOUNT_NOT_FOUND"
+            - "ACCOUNT_ALREADY_EXISTS"
+            - "INSUFFICIENT_FUNDS"
+            - "IDEMPOTENCY_CONFLICT"
+            - "INTERNAL_ERROR"
+          example: "INSUFFICIENT_FUNDS"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Account balance is insufficient for this withdrawal"
+        details:
+          type: object
+          description: Additional error context
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalid_amount:
+              summary: Invalid amount format
+              value:
+                error: "INVALID_AMOUNT"
+                message: "Amount must be at least 0.01"
+            malformed_request:
+              summary: Malformed request
+              value:
+                error: "INVALID_REQUEST"
+                message: "Request body is malformed"
+
+    NotFound:
+      description: Account not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "ACCOUNT_NOT_FOUND"
+            message: "No account found with the specified ID"
+
+    Conflict:
+      description: Request conflicts with current state (duplicate account or idempotency key conflict)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            account_exists:
+              summary: Account already exists
+              value:
+                error: "ACCOUNT_ALREADY_EXISTS"
+                message: "Account with this ID already exists"
+            idempotency_conflict:
+              summary: Idempotency key conflict
+              value:
+                error: "IDEMPOTENCY_CONFLICT"
+                message: "Request with this idempotency key has different parameters"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "INTERNAL_ERROR"
+            message: "An unexpected error occurred"

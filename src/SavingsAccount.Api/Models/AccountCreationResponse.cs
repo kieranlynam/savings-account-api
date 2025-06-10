@@ -1,7 +1,6 @@
 namespace SavingsAccount.Api.Models;
 
-public class BalanceResponse
+public class AccountCreationResponse
 {
     public string AccountId { get; set; } = string.Empty;
-    public string Balance { get; set; } = string.Empty;
 }
