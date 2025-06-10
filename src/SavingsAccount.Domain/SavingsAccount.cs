@@ -6,14 +6,14 @@ public class SavingsAccount
     
     public string Id { get; }
     public Money Balance { get; private set; }
-    public decimal InterestRate { get; private set; }
+    public InterestRate InterestRate { get; private set; }
     public DateTime CreatedAt { get; }
     public IReadOnlyList<Transaction> Transactions => _transactions.AsReadOnly();
 
-    public SavingsAccount(string id, decimal interestRate = 0.042m)
+    public SavingsAccount(string id, InterestRate? interestRate = null)
     {
         Id = id ?? throw new ArgumentNullException(nameof(id));
-        InterestRate = interestRate;
+        InterestRate = interestRate ?? new InterestRate(0.042m);
         Balance = new Money(0.01m);
         CreatedAt = DateTime.UtcNow;
     }

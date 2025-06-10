@@ -11,7 +11,7 @@ public class SavingsAccountService(ISavingsAccountRepository repository)
         if (await _repository.ExistsAsync(accountId))
             throw new InvalidOperationException($"Account {accountId} already exists");
 
-        var account = new Domain.SavingsAccount(accountId, interestRate);
+        var account = new Domain.SavingsAccount(accountId, new InterestRate(interestRate));
         return await _repository.SaveAsync(account);
     }
 

@@ -11,7 +11,7 @@ public class SavingsAccountTests
         
         Assert.Equal("test-123", account.Id);
         Assert.Equal(0.01m, account.Balance.Amount);
-        Assert.Equal(0.042m, account.InterestRate);
+        Assert.Equal(0.042m, account.InterestRate.Value);
     }
 
     [Fact]
