@@ -8,6 +8,7 @@ public class SavingsAccount
     public Money Balance { get; private set; }
     public InterestRate InterestRate { get; private set; }
     public DateTime CreatedAt { get; }
+    public long Version { get; private set; }
     public IReadOnlyList<Transaction> Transactions => _transactions.AsReadOnly();
 
     public SavingsAccount(string id, InterestRate? interestRate = null)
@@ -16,6 +17,7 @@ public class SavingsAccount
         InterestRate = interestRate ?? new InterestRate(0.042m);
         Balance = new Money(0.01m);
         CreatedAt = DateTime.UtcNow;
+        Version = 1;
     }
 
     public void Deposit(Money amount, string? idempotencyKey = null)
@@ -32,6 +34,7 @@ public class SavingsAccount
 
         _transactions.Add(transaction);
         Balance += amount;
+        Version++;
     }
 
     public void Withdraw(Money amount, string? idempotencyKey = null)
@@ -51,6 +54,7 @@ public class SavingsAccount
 
         _transactions.Add(transaction);
         Balance -= amount;
+        Version++;
     }
 
     public Money AccrueInterest(string? idempotencyKey = null)
@@ -72,6 +76,7 @@ public class SavingsAccount
 
             _transactions.Add(transaction);
             Balance = newBalance;
+            Version++;
         }
 
         return interestEarned;

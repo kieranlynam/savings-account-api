@@ -12,6 +12,7 @@ public class SavingsAccountTests
         Assert.Equal("test-123", account.Id);
         Assert.Equal(0.01m, account.Balance.Amount);
         Assert.Equal(0.042m, account.InterestRate.Value);
+        Assert.Equal(1, account.Version);
     }
 
     [Fact]
@@ -25,6 +26,7 @@ public class SavingsAccountTests
         Assert.Equal(100.01m, account.Balance.Amount);
         Assert.Single(account.Transactions);
         Assert.Equal(TransactionType.Deposit, account.Transactions[0].Type);
+        Assert.Equal(2, account.Version);
     }
 
     [Fact]
@@ -38,6 +40,7 @@ public class SavingsAccountTests
         Assert.Equal(50.01m, account.Balance.Amount);
         Assert.Equal(2, account.Transactions.Count);
         Assert.Equal(TransactionType.Withdrawal, account.Transactions[1].Type);
+        Assert.Equal(3, account.Version);
     }
 
     [Fact]
@@ -60,6 +63,7 @@ public class SavingsAccountTests
         Assert.True(interestEarned.Amount > 0);
         Assert.True(account.Balance.Amount > 1000.01m);
         Assert.Equal(TransactionType.InterestAccrual, account.Transactions.Last().Type);
+        Assert.Equal(3, account.Version);
     }
 
     [Fact]
@@ -73,5 +77,6 @@ public class SavingsAccountTests
         
         Assert.Equal(100.01m, account.Balance.Amount);
         Assert.Single(account.Transactions);
+        Assert.Equal(2, account.Version);
     }
 }

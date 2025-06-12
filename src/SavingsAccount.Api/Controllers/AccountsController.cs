@@ -16,6 +16,12 @@ public class AccountsController : ControllerBase
         _accountService = accountService ?? throw new ArgumentNullException(nameof(accountService));
     }
 
+    /// <summary>
+    /// Create a new savings account
+    /// </summary>
+    /// <param name="request">Account creation details</param>
+    /// <param name="idempotencyKey">Unique key to ensure idempotent operations</param>
+    /// <returns>Created account details</returns>
     [HttpPost]
     [ProducesResponseType<AccountCreationResponse>(201)]
     [ProducesResponseType<ErrorResponse>(400)]
@@ -32,7 +38,7 @@ public class AccountsController : ControllerBase
                 request.AccountId, 
                 request.InterestRate ?? 0.042m);
 
-            return Created($"/accounts/{account.Id}", new AccountCreationResponse { AccountId = account.Id });
+            return Created($"/accounts/{account.Id}", new AccountCreationResponse { AccountId = account.Id, Version = account.Version });
         }
         catch (InvalidOperationException ex)
         {
@@ -44,6 +50,12 @@ public class AccountsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deposit money into an account
+    /// </summary>
+    /// <param name="accountId">Account identifier</param>
+    /// <param name="request">Deposit amount</param>
+    /// <param name="idempotencyKey">Unique key to ensure idempotent operations</param>
     [HttpPost("{accountId}/deposits")]
     [ProducesResponseType(204)]
     [ProducesResponseType<ErrorResponse>(400)]
@@ -73,6 +85,12 @@ public class AccountsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Withdraw money from an account
+    /// </summary>
+    /// <param name="accountId">Account identifier</param>
+    /// <param name="request">Withdrawal amount</param>
+    /// <param name="idempotencyKey">Unique key to ensure idempotent operations</param>
     [HttpPost("{accountId}/withdrawals")]
     [ProducesResponseType(204)]
     [ProducesResponseType<ErrorResponse>(400)]
@@ -106,6 +124,11 @@ public class AccountsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Get account balance
+    /// </summary>
+    /// <param name="accountId">Account identifier</param>
+    /// <returns>Current account balance</returns>
     [HttpGet("{accountId}/balance")]
     [ProducesResponseType<BalanceResponse>(200)]
     [ProducesResponseType<ErrorResponse>(400)]
@@ -115,8 +138,8 @@ public class AccountsController : ControllerBase
     {
         try
         {
-            var balance = await _accountService.GetBalanceAsync(accountId);
-            return Ok(new BalanceResponse { AccountId = accountId, Balance = balance.ToString() });
+            var account = await _accountService.GetAccountAsync(accountId);
+            return Ok(new BalanceResponse { AccountId = accountId, Balance = account.Balance.ToString(), Version = account.Version });
         }
         catch (InvalidOperationException ex)
         {
@@ -128,6 +151,11 @@ public class AccountsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Accrue interest on an account
+    /// </summary>
+    /// <param name="accountId">Account identifier</param>
+    /// <param name="idempotencyKey">Unique key to ensure idempotent operations</param>
     [HttpPost("{accountId}/interest_accruals")]
     [ProducesResponseType(204)]
     [ProducesResponseType<ErrorResponse>(400)]
