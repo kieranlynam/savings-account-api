@@ -40,13 +40,17 @@ public class AccountsController : ControllerBase
 
             return Created($"/accounts/{account.Id}", new AccountCreationResponse { AccountId = account.Id, Version = account.Version });
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
         {
             return Conflict(new ErrorResponse { Error = "ACCOUNT_ALREADY_EXISTS", Message = ex.Message });
         }
-        catch (Exception ex)
+        catch (InvalidOperationException)
         {
-            return BadRequest(new ErrorResponse { Error = "INVALID_REQUEST", Message = ex.Message });
+            return StatusCode(500, new ErrorResponse { Error = "DATABASE_ERROR", Message = "A database error occurred. Please try again." });
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new ErrorResponse { Error = "INTERNAL_ERROR", Message = "An unexpected error occurred. Please try again." });
         }
     }
 

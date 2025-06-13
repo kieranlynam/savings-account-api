@@ -13,10 +13,13 @@ builder.Services.AddControllers()
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddSingleton<ISavingsAccountRepository, InMemorySavingsAccountRepository>();
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+builder.Services.AddSingleton<ISavingsAccountRepository>(provider => 
+    new DapperSavingsAccountRepository(connectionString));
 builder.Services.AddScoped<SavingsAccountService>();
 
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment())
 {
