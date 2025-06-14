@@ -123,18 +123,31 @@ public class DapperSavingsAccountRepository : ISavingsAccountRepository
             }
 
             // Insert new transactions (only those not already persisted)
-            const string maxTransactionTimestampSql = @"
-                SELECT COALESCE(MAX(Timestamp), '1900-01-01T00:00:00.0000000Z') 
+            // Get existing transaction details to check for duplicates
+            const string existingTransactionsSql = @"
+                SELECT Id, IdempotencyKey, Amount, Type, Timestamp 
                 FROM Transactions 
-                WHERE AccountId = @accountId";
+                WHERE AccountId = @accountId 
+                ORDER BY Timestamp";
 
-            var lastPersistedTimestamp = await connection.QuerySingleAsync<string>(
-                maxTransactionTimestampSql, 
+            var existingTransactions = await connection.QueryAsync(
+                existingTransactionsSql, 
                 new { accountId = account.Id }, 
                 transaction);
 
-            var lastPersisted = DateTime.Parse(lastPersistedTimestamp);
-            var newTransactions = account.Transactions.Where(t => t.Timestamp > lastPersisted).ToList();
+            // Filter out transactions that match existing ones by idempotency key and properties
+            var existingSet = new HashSet<string>();
+            foreach (var existing in existingTransactions)
+            {
+                var key = $"{existing.IdempotencyKey}:{existing.Amount}:{existing.Type}";
+                existingSet.Add(key);
+            }
+
+            var newTransactions = account.Transactions.Where(t => 
+            {
+                var key = $"{t.IdempotencyKey}:{t.Amount.Amount}:{(int)t.Type}";
+                return !existingSet.Contains(key);
+            }).ToList();
 
             // Only update account if there are new transactions (prevents unnecessary concurrency conflicts)
             if (newTransactions.Any())
@@ -142,14 +155,13 @@ public class DapperSavingsAccountRepository : ISavingsAccountRepository
                 // Update account state since there are new transactions
                 if (exists)
                 {
-                    // Get current persisted version for concurrency check
-                    const string currentVersionSql = "SELECT Version FROM SavingsAccounts WHERE Id = @id";
-                    var currentVersion = await connection.QuerySingleAsync<long>(currentVersionSql, new { id = account.Id }, transaction);
+                    // Calculate expected database version (total transactions + 1 - new transactions)
+                    var expectedVersion = account.Transactions.Count + 1 - newTransactions.Count;
                     
                     const string updateAccountSql = @"
                         UPDATE SavingsAccounts 
                         SET Balance = @Balance, InterestRate = @InterestRate, Version = @NewVersion
-                        WHERE Id = @Id AND Version = @CurrentVersion";
+                        WHERE Id = @Id AND Version = @ExpectedVersion";
 
                     var rowsAffected = await connection.ExecuteAsync(updateAccountSql, new
                     {
@@ -157,7 +169,7 @@ public class DapperSavingsAccountRepository : ISavingsAccountRepository
                         Balance = account.Balance.Amount,
                         InterestRate = account.InterestRate.Value,
                         NewVersion = account.Version,
-                        CurrentVersion = currentVersion
+                        ExpectedVersion = expectedVersion
                     }, transaction);
 
                     if (rowsAffected == 0)
