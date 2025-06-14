@@ -103,9 +103,9 @@ public class DapperSavingsAccountRepository : ISavingsAccountRepository
         {
             // Check if account exists
             const string existsSql = "SELECT COUNT(1) FROM SavingsAccounts WHERE Id = @id";
-            var exists = await connection.QuerySingleAsync<int>(existsSql, new { id = account.Id }, transaction) > 0;
+            var accountExists = await connection.QuerySingleAsync<int>(existsSql, new { id = account.Id }, transaction) > 0;
 
-            if (!exists)
+            if (!accountExists)
             {
                 // Insert new account (only metadata, not derived state)
                 const string insertAccountSql = @"
@@ -150,10 +150,10 @@ public class DapperSavingsAccountRepository : ISavingsAccountRepository
             }).ToList();
 
             // Only update account if there are new transactions (prevents unnecessary concurrency conflicts)
-            if (newTransactions.Any())
+            if (newTransactions.Count != 0)
             {
                 // Update account state since there are new transactions
-                if (exists)
+                if (accountExists)
                 {
                     // Calculate expected database version (total transactions + 1 - new transactions)
                     var expectedVersion = account.Transactions.Count + 1 - newTransactions.Count;

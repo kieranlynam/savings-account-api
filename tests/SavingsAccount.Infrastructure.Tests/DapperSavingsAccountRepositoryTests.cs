@@ -22,27 +22,8 @@ public class DapperSavingsAccountRepositoryTests : IDisposable
 
     private void InitializeTestSchema()
     {
-        var schema = @"
-CREATE TABLE IF NOT EXISTS SavingsAccounts (
-    Id TEXT PRIMARY KEY NOT NULL,
-    Balance DECIMAL(18,2) NOT NULL,
-    InterestRate DECIMAL(5,4) NOT NULL,
-    CreatedAt TEXT NOT NULL,
-    Version INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS Transactions (
-    Id TEXT PRIMARY KEY NOT NULL,
-    AccountId TEXT NOT NULL,
-    Type INTEGER NOT NULL,
-    Amount DECIMAL(18,2) NOT NULL,
-    Timestamp TEXT NOT NULL,
-    IdempotencyKey TEXT,
-    FOREIGN KEY (AccountId) REFERENCES SavingsAccounts(Id) ON DELETE CASCADE
-);
-
-CREATE INDEX IF NOT EXISTS IX_Transactions_AccountId ON Transactions(AccountId);
-CREATE INDEX IF NOT EXISTS IX_Transactions_IdempotencyKey ON Transactions(IdempotencyKey);";
+        var schemaPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "SavingsAccount.Infrastructure", "schema.sql");
+        var schema = File.ReadAllText(schemaPath);
         
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -268,9 +249,6 @@ CREATE INDEX IF NOT EXISTS IX_Transactions_IdempotencyKey ON Transactions(Idempo
 }
 
 // Test-specific repository that skips schema initialization
-internal class TestDapperSavingsAccountRepository : DapperSavingsAccountRepository
+internal class TestDapperSavingsAccountRepository(string connectionString) : DapperSavingsAccountRepository(connectionString, skipInitialization: true)
 {
-    public TestDapperSavingsAccountRepository(string connectionString) : base(connectionString, skipInitialization: true)
-    {
-    }
 }
